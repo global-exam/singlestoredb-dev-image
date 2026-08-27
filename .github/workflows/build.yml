@@ -18,13 +18,15 @@ jobs:
   auto-tag:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment: production
+
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v6
         with:
           fetch-depth: 0  # Fetch all history and tags
-          ssh-key: "${{ secrets.COMMIT_KEY_INFRA_AUTOMATION }}"
 
       - name: Get changed files
         id: changed-files
@@ -36,14 +38,29 @@ jobs:
       - name: Extract version and create tag
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
-          # Extract most recent tag published and increment one top of it.
-          TAG_NAME="$(git describe --tags --abbrev=0 | awk -F. -v OFS=. '{$NF += 1 ; print}')"
-          
+          # Increment the most recent tag published. This fork has no tags of its
+          # own, so fall back to the version at the top of the changelog, which
+          # the version bump commit already carries.
+          if PREV_TAG="$(git describe --tags --abbrev=0 2>/dev/null)"; then
+              TAG_NAME="$(echo "${PREV_TAG}" | awk -F. -v OFS=. '{$NF += 1 ; print}')"
+          else
+              TAG_NAME="$(grep -m1 -oE '^## [0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | awk '{print $2}')"
+              if [ -z "${TAG_NAME}" ]; then
+                  echo "::error::No git tag found, and no version at the top of CHANGELOG.md"
+                  exit 1
+              fi
+          fi
+
+          if git rev-parse -q --verify "refs/tags/${TAG_NAME}" >/dev/null; then
+              echo "::notice::Tag ${TAG_NAME} already exists, nothing to do"
+              exit 0
+          fi
+
           echo "Creating tag: $TAG_NAME"
 
           git tag "$TAG_NAME"
           git push origin "$TAG_NAME"
-          
+
           echo "Successfully created and pushed tag: $TAG_NAME"
 
   build-and-test-image:
@@ -107,9 +124,10 @@ jobs:
           ${{steps.grype.outputs.cmd}} --only-fixed singlestore-labs/singlestoredb-dev
 
   publish-image:
-    # Run if someone pushes a tag manually (or)
-    # Run when auto-tag creates a tag (which triggers a new workflow run with github.ref_type == 'tag')
-    if: github.ref_type == 'tag'
+    # Run if someone pushes a tag manually, or on every push to main. Tags
+    # created by auto-tag do not start a new workflow run (GITHUB_TOKEN pushes
+    # never trigger workflows), so main is what actually publishes the image.
+    if: github.ref_type == 'tag' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
 
     permissions:
@@ -137,6 +155,7 @@ jobs:
         run: |
           echo "CONFIG="$(jq 'del(.kai)' config.json | tr '\n' ' ')"" >> ${GITHUB_ENV}
           echo "KAI_VERSION="$(jq -r .kai config.json)"" >> ${GITHUB_ENV}
+          echo "IMAGE_VERSION=$(grep -m1 -oE '^## [0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | awk '{print $2}')" >> ${GITHUB_ENV}
 
       - name: Docker meta
         id: meta
@@ -144,9 +163,12 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           images: |
-            ghcr.io/singlestore-labs/singlestoredb-dev
+            ghcr.io/${{ github.repository_owner }}/singlestoredb-dev
           tags: |
             type=semver,pattern={{version}}
+            type=raw,value=${{ env.IMAGE_VERSION }},enable=${{ env.IMAGE_VERSION != '' }}
+            type=raw,value=latest
+            type=sha,format=short
           labels: |
             org.opencontainers.image.vendor=SingleStore
 
@@ -171,7 +193,7 @@ jobs:
 
     services:
       singlestoredb:
-        image: ghcr.io/singlestore-labs/singlestoredb-dev:latest
+        image: ghcr.io/${{ github.repository_owner }}/singlestoredb-dev:latest
         ports:
           - 3306:3306
           - 8080:8080
