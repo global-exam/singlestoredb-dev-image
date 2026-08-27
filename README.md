@@ -310,6 +310,7 @@ You can use the version numbers in the first column of the following table in or
 
 | `SINGLESTORE_VERSION`                    | Description                                                      |                                                                                                                                              |
 | ---------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `helios:10.2`                              | SingleStore version deployed on SingleStore Helios (cloud), see release notes | [release notes](https://docs.singlestore.com/cloud/release-notes/) |
 | `rc:9.1`                                   | SingleStore Self-Managed 9.1, see release log for latest version | [changelog](https://docs.singlestore.com/db/v9.1/release-notes/singlestore-memsql/9-1-release-notes/) |
 | `9.0`                                      | SingleStore Self-Managed 9.0, see release log for latest version | [changelog](https://docs.singlestore.com/db/v9.0/release-notes/singlestore-memsql/9-0-release-notes/) |
 | `8.9`                                      | SingleStore Self-Managed 8.9, see changelog for latest version | [changelog](https://docs.singlestore.com/db/v8.9/release-notes/singlestore-memsql/8-9-release-notes/maintenance-release-changelog-v-8-9/) |

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.85 - 2026-08-27
+- SingleStoreDB Version 10.2.0 on Helios channel (matches SingleStore Helios production)
+
 ## 0.2.84 - 2026-08-25
 - SingleStoreDB Toolbox Version 1.19.0
 
