@@ -1,9 +1,8 @@
 {
   "channel": "production",
   "client": "1.0.8",
-  "engine_channel": "helios",
-  "kai": "1.0.102",
-  "server": "10.2.0-22d7deb099",
+  "engine_channel": "production",
+  "server": "10.9.0-d16d12a6ad",
   "studio": "4.1.1",
-  "toolbox": "1.19.0"
+  "toolbox": "1.19.4"
 }

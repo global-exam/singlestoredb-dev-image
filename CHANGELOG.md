@@ -1,7 +1,29 @@
 # Changelog
 
-## 0.2.85 - 2026-08-27
-- SingleStoreDB Version 10.2.0 on Helios channel (matches SingleStore Helios production)
+## 0.2.92 - 2026-11-25
+- SingleStoreDB Version 10.9.0, pinned to match SingleStore Helios production (upstream 0.2.92 ships 10.10.0)
+- Also tagged with the engine version: `10.9.0-d16d12a6ad`
+
+## 0.2.91 - 2026-11-23
+- SingleStoreDB Toolbox Version 1.19.4
+
+## 0.2.90 - 2026-11-05
+- SingleStoreDB Toolbox Version 1.19.3
+
+## 0.2.89 - 2026-11-04
+- Remove Kai (MongoDB API) from the image. Images at 0.2.88 and earlier still include it and can be started with `ENABLE_KAI=1`.
+
+## 0.2.88 - 2026-11-03
+- SingleStoreDB Version 10.9.0
+
+## 0.2.87 - 2026-10-27
+- SingleStoreDB Version 10.8.1
+
+## 0.2.86 - 2026-10-14
+- SingleStoreDB Toolbox Version 1.19.2
+
+## 0.2.85 - 2026-09-22
+- SingleStoreDB Toolbox Version 1.19.1
 
 ## 0.2.84 - 2026-08-25
 - SingleStoreDB Toolbox Version 1.19.0
