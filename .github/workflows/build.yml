@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+  # Manual run (Actions tab > build > Run workflow). Publishes the image when
+  # started on main.
+  workflow_dispatch:
+
   push:
     paths-ignore:
       - "CHANGELOG.md"
@@ -122,10 +126,11 @@ jobs:
           ${{steps.grype.outputs.cmd}} --only-fixed singlestore-labs/singlestoredb-dev
 
   publish-image:
-    # Run if someone pushes a tag manually, or on every push to main. Tags
-    # created by auto-tag do not start a new workflow run (GITHUB_TOKEN pushes
-    # never trigger workflows), so main is what actually publishes the image.
-    if: github.ref_type == 'tag' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    # Run if someone pushes a tag manually, on every push to main, or when the
+    # workflow is started by hand on main. Tags created by auto-tag do not
+    # start a new workflow run (GITHUB_TOKEN pushes never trigger workflows),
+    # so main is what actually publishes the image.
+    if: github.ref_type == 'tag' || ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
 
     permissions:
